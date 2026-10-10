@@ -71,3 +71,9 @@ La contraseña se verifica en el servidor; sin ella no se acepta ninguna escritu
 
 ## 7. Cuentas, historial y agenda (novedades)
 Vea `NOVIDADES.md` (portugués). Resumen: entre en `/#login` con la contraseña maestra, abra la pestaña **Acesso** para crear una cuenta por coordinador y restaurar versiones anteriores. La pestaña **Compartilhar** tiene enlaces de agenda para suscribirse en el celular.
+
+## 8. Avisos automáticos (correo / WhatsApp)
+Vea `docs/AVISOS-pt-BR.md` (portugués). Resumen: configure `RESEND_API_KEY` + `MAIL_FROM` (Resend) para correo y `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_TEMPLATE` (API de WhatsApp Cloud de Meta, plantilla aprobada con una variable) para WhatsApp. Defina `CRON_SECRET` para el cron diario de Vercel (Netlify y el servidor propio lo programan solos). Sin claves, el envío es simulado.
+
+## 9. Copia de seguridad programada
+Vea `docs/BACKUP-pt-BR.md` (portugués): copia diaria en la base, copia semanal por correo (`BACKUP_EMAIL`), restauración desde la pestaña Dados o con `scripts/restore-backup.js`.

@@ -18,5 +18,24 @@
 - **Imprimir / salvar em PDF** na aba Enviar e **backup completo** em arquivo na aba Dados.
 - **Testes automáticos** da API: `npm test`.
 
+## Chamada, faltas e reposição (nova rodada)
+- **Aba Chamada.** Lista as aulas do calendário e registra cada uma como *dada* ou *não dada* (com motivo). Mostra aulas passadas sem registro, encontros já dados e aulas não dadas sem reposição.
+- **Aba Alunos.** Cadastro da turma (cole a lista, com matrícula opcional). Ao registrar uma aula dada, informe a falta de cada aluno (0 a todas as aulas do dia). A tabela soma as faltas por disciplina, compara com o limite de 25% e marca *Atenção* (a partir de 75% do limite) e *Limite excedido*. Exporta a frequência em CSV.
+- **Reposição automática.** Aula marcada como não dada deixa de contar como encontro realizado. O sistema sugere datas livres (sem feriado, sem choque de docente, de sala ou de disciplina; sábados opcionais) e o botão *Repor tudo automaticamente* lança a primeira data de cada aula. A reposição aparece no calendário como "Reposição de dd/mm". Mudar o registro depois remove a reposição.
+- **Conta de docente.** Na aba Acesso, o tipo *Docente* só pode lançar chamada e alunos. O servidor recusa qualquer outra alteração. O docente vê apenas as abas Chamada, Alunos e Relatórios.
+- **Privacidade.** Visitantes (alunos e quem abre os links públicos) não recebem nomes de alunos, faltas nem motivos: só se a aula foi dada e a reposição. Trate a lista de alunos conforme a LGPD da instituição.
+
+## Avisos por e-mail e WhatsApp (nova rodada)
+- **Aba Avisos.** Alterações do calendário (diário, 20h), lembrete na véspera de cada aula, aviso imediato e mensagem livre. Canal: e-mail (Resend), WhatsApp (API oficial da Meta) ou ambos; grupos: alunos, docentes e lista extra.
+- **Contatos** de alunos (aba Alunos) e docentes (aba Docentes). Visitantes dos links públicos não recebem e-mails, telefones nem a lista de destinatários.
+- **Histórico** de envios com falhas registradas; falha mantém as alterações pendentes para a próxima tentativa.
+- **Modo simulado** quando as chaves não estão configuradas. Guia completo: `docs/AVISOS-pt-BR.md`.
+
+## Backup agendado (nova rodada)
+- **Diário (20h):** cópia completa guardada no banco quando algo mudou (últimas 30 + a primeira de cada mês por 12 meses).
+- **Semanal por e-mail:** arquivo anexo aos domingos, com opção de omitir dados de alunos.
+- **Aba Dados:** fazer backup agora, baixar e restaurar (com cópia automática "antes de restaurar").
+- **Recuperação total:** `scripts/restore-backup.js`. Guia: `docs/BACKUP-pt-BR.md`.
+
 ## Ainda não incluído
-Reposição automática de aulas, registro de aulas dadas e faltas dos alunos, envio automático por e-mail/WhatsApp (exige contratar um serviço de envio), backup agendado e divisão do código em módulos.
+Divisão do código em módulos e acessibilidade completa.

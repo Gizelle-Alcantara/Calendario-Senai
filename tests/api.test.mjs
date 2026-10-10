@@ -74,3 +74,173 @@ test("agenda .ics da turma e do docente", async () => {
   assert.match(d, /SUMMARY:LOG/);
   assert.equal((await get("?ics=turma-nao-existe")).status, 404);
 });
+
+test("visitante não recebe alunos nem faltas; logado recebe", async () => {
+  const m = await login({ password: "mestre-123" });
+  const st = { ...turma.state, alunos: [{ id: "a1", nome: "Aluno Secreto" }], reg: { "2027-03-01": { dado: "sim", faltas: { a1: 2 }, obs: "x", motivo: "m" }, "2027-03-03": { dado: "nao", motivo: "Docente ausente", rep: "2027-03-05" } } };
+  const cur = (await (await get("", m.cookie)).json()).docs.find((d) => d.id === "turma-t1");
+  await call({ op: "set", id: "turma-t1", base: cur.rev, data: { state: st } }, m.cookie);
+  const pub = JSON.stringify(await (await get()).json());
+  assert.doesNotMatch(pub, /Aluno Secreto|faltas|Docente ausente|"obs"/);
+  assert.match(pub, /"dado":"nao"/);
+  assert.match(JSON.stringify(await (await get("", m.cookie)).json()), /Aluno Secreto/);
+});
+test("conta de docente só altera chamada e alunos", async () => {
+  const m = await login({ password: "mestre-123" });
+  assert.equal((await call({ op: "user_add", login: "prof", nome: "Prof", password: "senha-docente-1", role: "docente" }, m.cookie)).status, 200);
+  const d = await login({ login: "prof", password: "senha-docente-1" });
+  const cur = (await (await get("", d.cookie)).json()).docs.find((x) => x.id === "turma-t1");
+  const ok = await call({ op: "set", id: "turma-t1", base: cur.rev, data: { ...cur.data, state: { ...cur.data.state, reg: { ...cur.data.state.reg, "2027-03-09": { dado: "sim" } } } } }, d.cookie);
+  assert.equal(ok.status, 200);
+  const cur2 = (await (await get("", d.cookie)).json()).docs.find((x) => x.id === "turma-t1");
+  const bad = await call({ op: "set", id: "turma-t1", base: cur2.rev, data: { ...cur2.data, state: { ...cur2.data.state, cfg: { ...cur2.data.state.cfg, coord: "X" } } } }, d.cookie);
+  assert.equal(bad.status, 403);
+  assert.equal((await call({ op: "delete", id: "turma-t1" }, d.cookie)).status, 403);
+  assert.equal((await call({ op: "history" }, d.cookie)).status, 403);
+  assert.equal((await call({ op: "set", id: "geral", base: 1, data: { docentes: [] } }, d.cookie)).status, 403);
+});
+test("agenda ignora aula não dada", async () => {
+  const t = await (await get("?ics=turma-t1")).text();
+  assert.match(t, /20270301T/);
+});
+
+/* ---------- avisos ---------- */
+const { runCron, runDaily, runBackup } = await import("../lib/core.js");
+const nst = (extra = {}) => ({ state: { cfg: { turma: "N1", curso: "Curso N", turno: "Vespertino", aulasDia: 4, destinatarios: "lista@x.com" }, ucs: [{ sigla: "LOG", nome: "Lógica", ch: 40, docente: "Ana", sala: "Lab 2" }, { sigla: "BD", nome: "Banco", ch: 40, docente: "Beto" }],
+  alunos: [{ id: "a1", nome: "Maria", email: "maria@x.com", tel: "(75) 99999-0001" }, { id: "a2", nome: "Sem Contato" }],
+  days: { "2027-03-02": { s: ["LOG"] }, "2027-03-04": { s: ["BD"] } }, reg: {}, aviso: { auto: true, lembrete: true, canal: "ambos", alunos: true, docentes: true, lista: true }, ...extra } });
+const setDoc = async (cookie, id, data) => { const cur = (await (await get("", cookie)).json()).docs.find((d) => d.id === id); return call({ op: "set", id, base: cur ? cur.rev : 0, data }, cookie); };
+
+test("avisos: sem chaves o envio é simulado e fica no histórico", async () => {
+  const { cookie } = await login({ password: "mestre-123" });
+  await setDoc(cookie, "geral", { docentes: [{ nome: "Ana", email: "ana@x.com", tel: "75 98888-0002" }, { nome: "Beto", email: "beto@x.com" }], base: "https://site.exemplo" });
+  await setDoc(cookie, "turma-n1", nst());
+  const st = await (await call({ op: "notify_status" }, cookie)).json();
+  assert.equal(st.email, false);
+  const r = await (await call({ op: "notify_send", turma: "n1", kind: "manual", assunto: "Teste", texto: "Olá", canal: "ambos" }, cookie)).json();
+  assert.equal(r.simulated, true);
+  assert.equal(r.recipients.emails, 4); // Maria, Ana, Beto, lista
+  assert.equal(r.recipients.phones, 2); // Maria, Ana
+  const lg = await (await call({ op: "notify_log" }, cookie)).json();
+  assert.equal(lg.items[0].kind, "manual");
+});
+test("avisos: e-mail e WhatsApp chamam os serviços com o formato certo", async () => {
+  const { cookie } = await login({ password: "mestre-123" });
+  Object.assign(process.env, { RESEND_API_KEY: "re_x", MAIL_FROM: "SENAI <a@b.com>", WHATSAPP_TOKEN: "tk", WHATSAPP_PHONE_ID: "123", WHATSAPP_TEMPLATE: "aviso_calendario" });
+  const calls = []; const real = globalThis.fetch;
+  globalThis.fetch = async (u, o) => { calls.push({ u: String(u), o }); return new Response("{}", { status: 200 }); };
+  try {
+    const r = await (await call({ op: "notify_send", turma: "n1", kind: "manual", assunto: "Aviso", texto: "Linha 1\nLinha 2", canal: "ambos" }, cookie)).json();
+    assert.equal(r.ok, true); assert.equal(r.simulated, false);
+    const mail = calls.find((c) => c.u.includes("resend.com")); const sent = JSON.parse(mail.o.body);
+    assert.equal(sent.length, 4); assert.equal(mail.o.headers.authorization, "Bearer re_x"); assert.deepEqual(sent[0].to.length, 1);
+    const w = calls.filter((c) => c.u.includes("graph.facebook.com/v21.0/123/messages"));
+    assert.equal(w.length, 2);
+    const wb = JSON.parse(w[0].o.body); assert.match(wb.to, /^55\d{10,11}$/); assert.equal(wb.template.name, "aviso_calendario");
+    assert.doesNotMatch(wb.template.components[0].parameters[0].text, /\n/);
+  } finally { globalThis.fetch = real; }
+});
+test("avisos: falha do serviço é registrada", async () => {
+  const { cookie } = await login({ password: "mestre-123" }); const real = globalThis.fetch;
+  globalThis.fetch = async () => new Response("erro", { status: 422 });
+  try {
+    const r = await (await call({ op: "notify_send", turma: "n1", kind: "manual", assunto: "A", texto: "B", canal: "email" }, cookie)).json();
+    assert.equal(r.ok, false);
+    const lg = await (await call({ op: "notify_log" }, cookie)).json();
+    assert.equal(lg.items[0].ok, false); assert.match(lg.items[0].erro, /Resend 422/);
+  } finally { globalThis.fetch = real; }
+});
+test("avisos: alterações pendentes e agendador (digest único + lembrete)", async () => {
+  const { cookie } = await login({ password: "mestre-123" });
+  const calls = []; const real = globalThis.fetch;
+  globalThis.fetch = async (u, o) => { calls.push(String(u)); return new Response("{}", { status: 200 }); };
+  try {
+    const NOW = new Date("2027-03-01T23:00:00Z"); // 20:00 em Salvador
+    await runCron(NOW); // primeira passada: só registra a base
+    assert.equal(calls.length, 0);
+    const p0 = await (await call({ op: "notify_preview", turma: "n1" }, cookie)).json();
+    assert.equal(p0.lines.length, 0);
+    const cur = (await (await get("", cookie)).json()).docs.find((d) => d.id === "turma-n1");
+    const s = cur.data.state; s.days["2027-03-04"] = { s: ["BD"] }; s.reg = { "2027-03-04": { dado: "nao", motivo: "Docente ausente" } };
+    s.days["2027-03-09"] = { s: ["BD"], t: "nota", h: "Reposição de 04/03/2027" }; s.reg["2027-03-04"].rep = "2027-03-09";
+    await call({ op: "set", id: "turma-n1", base: cur.rev, data: { state: s } }, cookie);
+    const p1 = await (await call({ op: "notify_preview", turma: "n1" }, cookie)).json();
+    assert.equal(p1.lines.length, 2); assert.match(p1.lines.join("|"), /não será dada/); assert.match(p1.lines.join("|"), /reposição/);
+    const out = await runCron(NOW);
+    const kinds = out.map((o) => o.kind).sort(); assert.deepEqual(kinds, ["alterações", "lembrete"]);
+    assert.ok(calls.some((c) => c.includes("resend.com")) && calls.some((c) => c.includes("graph.facebook.com")));
+    const n = calls.length; const again = await runCron(NOW);
+    assert.equal(again.length, 0); assert.equal(calls.length, n); // nada repetido
+    const lg = await (await call({ op: "notify_log" }, cookie)).json();
+    assert.ok(lg.items.some((i) => i.kind === "lembrete" && i.by.includes("agendado")));
+  } finally { globalThis.fetch = real; }
+});
+test("agendador por HTTP exige CRON_SECRET; visitante não vê contatos", async () => {
+  assert.equal((await get("?cron=1")).status, 401);
+  process.env.CRON_SECRET = "cron-segredo";
+  assert.equal((await handle(new Request("http://x/api?cron=1", { headers: { authorization: "Bearer errado" } }))).status, 401);
+  assert.equal((await handle(new Request("http://x/api?cron=1", { headers: { authorization: "Bearer cron-segredo" } }))).status, 200);
+  const pub = JSON.stringify(await (await get()).json());
+  assert.doesNotMatch(pub, /ana@x\.com|98888|maria@x\.com|lista@x\.com/);
+  const { cookie } = await login({ login: "prof", password: "senha-docente-1" });
+  assert.equal((await call({ op: "notify_send", turma: "n1", kind: "manual", assunto: "x", texto: "y" }, cookie)).status, 403);
+});
+
+/* ---------- backup agendado ---------- */
+test("backup: manual cria, agendado não duplica sem mudanças, mas cria se mudou", async () => {
+  const { cookie } = await login({ password: "mestre-123" });
+  const m = await (await call({ op: "backup_now" }, cookie)).json(); assert.equal(m.ok, true); assert.ok(m.docs >= 2);
+  const s1 = await runBackup("agendado", "Sistema"); assert.match(s1.skipped, /sem alterações/);
+  await call({ op: "set", id: "turma-bk", base: 0, data: nst() }, cookie);
+  const s2 = await runBackup("agendado", "Sistema"); assert.equal(s2.saved, true);
+  const l = await (await call({ op: "backup_list" }, cookie)).json();
+  assert.ok(l.items.length >= 2); assert.equal(l.items[0].kind, "agendado");
+});
+test("backup: baixar e restaurar desfaz uma edição ruim e guarda cópia de segurança", async () => {
+  const { cookie } = await login({ password: "mestre-123" });
+  const id = (await (await call({ op: "backup_list" }, cookie)).json()).items[0].id;
+  const dl = await (await call({ op: "backup_download", id }, cookie)).json();
+  const parsed = JSON.parse(dl.data); assert.ok(parsed.docs["turma-bk"]);
+  // estrago: apaga alunos da turma
+  const cur = (await (await get("", cookie)).json()).docs.find((d) => d.id === "turma-bk");
+  await call({ op: "set", id: "turma-bk", base: cur.rev, data: { state: { ...cur.data.state, alunos: [] } } }, cookie);
+  const r = await (await call({ op: "backup_restore", id }, cookie)).json(); assert.equal(r.ok, true);
+  const after = (await (await get("", cookie)).json()).docs.find((d) => d.id === "turma-bk");
+  assert.equal(after.data.state.alunos.length, 2);
+  const l = await (await call({ op: "backup_list" }, cookie)).json();
+  assert.ok(l.items.some((i) => i.kind === "antes de restaurar"));
+  assert.equal((await call({ op: "backup_restore", id: 999999 }, cookie)).status, 404);
+});
+test("backup: retenção mantém 30 recentes e o primeiro de cada mês", async () => {
+  const { cookie } = await login({ password: "mestre-123" });
+  for (let i = 0; i < 34; i++) await call({ op: "backup_now" }, cookie);
+  const l = await (await call({ op: "backup_list" }, cookie)).json();
+  assert.ok(l.items.length <= 30 + 1); // 30 recentes + 1º do mês (mesmo mês das recentes pode coincidir)
+  assert.ok(l.items.length >= 30);
+});
+test("backup: cópia por e-mail aos domingos com anexo (e sem alunos se pedido)", async () => {
+  Object.assign(process.env, { RESEND_API_KEY: "re_x", MAIL_FROM: "SENAI <a@b.com>", BACKUP_EMAIL: "coord@x.com" });
+  const calls = []; const real = globalThis.fetch;
+  globalThis.fetch = async (u, o) => { calls.push({ u: String(u), body: o && o.body ? JSON.parse(o.body) : null }); return new Response("{}", { status: 200 }); };
+  try {
+    const SUNDAY = new Date("2027-03-07T23:00:00Z"), MONDAY = new Date("2027-03-08T23:00:00Z");
+    const mon = await runDaily(MONDAY); assert.equal(mon.email, undefined);
+    const sun = await runDaily(SUNDAY); assert.equal(sun.email.sent, 1);
+    const mail = calls.find((c) => c.body && c.body.attachments);
+    assert.equal(mail.body.to[0], "coord@x.com"); assert.match(mail.body.attachments[0].filename, /^backup-planejador-2027-03-07\.json$/);
+    const att = JSON.parse(Buffer.from(mail.body.attachments[0].content, "base64").toString());
+    assert.ok(att.docs["turma-n1"].state.alunos.length > 0);
+    process.env.BACKUP_EMAIL_SEM_ALUNOS = "1";
+    calls.length = 0; await runDaily(SUNDAY);
+    const att2 = JSON.parse(Buffer.from(calls.find((c) => c.body && c.body.attachments).body.attachments[0].content, "base64").toString());
+    assert.equal(att2.docs["turma-n1"].state.alunos, undefined);
+  } finally { globalThis.fetch = real; delete process.env.BACKUP_EMAIL_SEM_ALUNOS; }
+});
+test("backup: só coordenador acessa; docente e visitante não", async () => {
+  assert.equal((await call({ op: "backup_list" })).status, 401);
+  const d = await login({ login: "prof", password: "senha-docente-1" });
+  assert.equal((await call({ op: "backup_list" }, d.cookie)).status, 403);
+  assert.equal((await call({ op: "backup_download", id: 1 }, d.cookie)).status, 403);
+  const r = await (await handle(new Request("http://x/api?cron=1", { headers: { authorization: "Bearer cron-segredo" } }))).json();
+  assert.ok(r.result.backup && r.result.avisos !== undefined);
+});
