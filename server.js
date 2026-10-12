@@ -5,7 +5,7 @@ import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { handle, runDaily } from "./lib/core.js";
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "public");
-const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".ico": "image/x-icon" };
+const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml", ".json": "application/json", ".ico": "image/x-icon" };
 http.createServer(async (rq, rs) => {
   try {
     const url = new URL(rq.url, "http://" + (rq.headers.host || "localhost"));

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b5cab">
+<title>Planejador de Turma · SENAI</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/components.css">
+<link rel="stylesheet" href="/css/calendar.css">
+<link rel="stylesheet" href="/css/overlay.css">
+<link rel="stylesheet" href="/css/a11y.css">
+<script src="/shim.js"></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<a class="skip" href="#view">Ir para o conteúdo principal</a>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><img id="logo" class="logo" alt="SENAI" width="142" height="38"><div class="id" id="hdr"></div><button id="themeBtn" class="btn sm" type="button"></button></div>
+  <nav class="tabs" id="tabs" aria-label="Seções do planejador"></nav>
+</header>
+<main id="view" tabindex="-1"></main>
+</div>
+<div id="modalRoot"></div>
+<div id="toastRoot" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+<noscript><p style="padding:16px">Este planejador precisa de JavaScript ativado para funcionar.</p></noscript>
+</body>
+</html>

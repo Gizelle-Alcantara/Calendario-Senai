@@ -37,5 +37,13 @@
 - **Aba Dados:** fazer backup agora, baixar e restaurar (com cópia automática "antes de restaurar").
 - **Recuperação total:** `scripts/restore-backup.js`. Guia: `docs/BACKUP-pt-BR.md`.
 
-## Ainda não incluído
-Divisão do código em módulos e acessibilidade completa.
+## Código em módulos (nova rodada)
+- O arquivo único de ~1.200 linhas virou **módulos ES** (`src/js`, `src/css`), sem bundler: regras puras, estado, salvamento, uma tela por arquivo. Guia: `docs/ARQUITETURA-pt-BR.md`.
+- **36 testes** (`npm test`): API e regras do calendário (horários, encontros, choques de docente/sala, bloqueios, reposição, faltas). `npm run lint` e `npm run test:smoke` também disponíveis.
+- QR Code agora está **dentro do projeto** (antes dependia de um CDN).
+
+## Acessibilidade (nova rodada)
+- Teclado completo, diálogos com foco preso e retorno, setas no calendário, link de pular, avisos para leitor de tela, tabelas e barras nomeadas, alto contraste, 200% de zoom e 360 px sem rolagem lateral.
+- **Correção:** o `index.html` publicado não tinha doctype, idioma nem viewport; agora tem.
+- Verificação automática com axe-core: `npm run test:a11y` (144/144). Falta testar com leitores de tela reais. Detalhes e limites: `docs/ACESSIBILIDADE-pt-BR.md`.
+- Atualizando: o app instalado (PWA) troca de versão sozinho (cache `planejador-v3`); recarregue a página uma vez.

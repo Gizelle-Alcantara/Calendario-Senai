@@ -72,7 +72,7 @@
   /* Login do coordenador: abra /#login */
   function ui() {
     const st = document.createElement("style");
-    st.textContent = ".lg-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:99}.lg-box{background:var(--surface,#fff);color:var(--ink,#14202e);border-radius:10px;padding:22px;width:min(92vw,340px);box-shadow:0 10px 40px rgba(0,0,0,.3);font-family:inherit}.lg-box h2{margin:0 0 12px;font-size:1.1rem}.lg-box input{width:100%;padding:10px;border:1px solid var(--line,#ccc);border-radius:6px;margin-bottom:10px;font:inherit;box-sizing:border-box;background:var(--surface2,#fff);color:inherit}.lg-box button{padding:9px 14px;border-radius:6px;border:1px solid var(--accent,#0b5cab);background:var(--accent,#0b5cab);color:#fff;font:inherit;cursor:pointer}.lg-box .x{background:transparent;color:inherit;border-color:var(--line,#ccc);margin-left:6px}.lg-err{color:#b3261e;font-size:.85rem;min-height:1.2em;margin:0 0 8px}.lg-out{position:fixed;right:12px;bottom:12px;z-index:50;padding:6px 12px;border-radius:6px;border:1px solid var(--line,#ccc);background:var(--surface,#fff);color:var(--ink,#14202e);font:inherit;font-size:.8rem;cursor:pointer}";
+    st.textContent = ".lg-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:99}.lg-box{background:var(--surface,#fff);color:var(--ink,#14202e);border-radius:10px;padding:22px;width:min(92vw,340px);box-shadow:0 10px 40px rgba(0,0,0,.3);font-family:inherit}.lg-box h2{margin:0 0 12px;font-size:1.1rem}.lg-box input{width:100%;padding:10px;border:1px solid var(--line,#ccc);border-radius:6px;margin-bottom:10px;font:inherit;box-sizing:border-box;background:var(--surface2,#fff);color:inherit}.lg-box button{padding:9px 14px;border-radius:6px;border:1px solid var(--accent,#0b5cab);background:var(--accent,#0b5cab);color:var(--accent-ink,#fff);font:inherit;cursor:pointer;min-height:36px}.lg-box label{display:block;font-size:.8rem;font-weight:600;margin-bottom:4px}.lg-box :focus-visible,.lg-out:focus-visible{outline:3px solid var(--accent,#0b5cab);outline-offset:2px}.lg-box .x{background:transparent;color:inherit;border-color:var(--line,#ccc);margin-left:6px}.lg-err{color:var(--bad,#b3261e);font-size:.85rem;min-height:1.2em;margin:0 0 8px}.lg-out{position:fixed;right:12px;bottom:12px;z-index:50;padding:6px 12px;border-radius:6px;border:1px solid var(--line,#ccc);background:var(--surface,#fff);color:var(--ink,#14202e);font:inherit;font-size:.8rem;cursor:pointer}";
     document.head.appendChild(st);
     first().then((s) => {
       if (s.admin) {
@@ -81,10 +81,13 @@
         document.body.appendChild(b);
       } else if (location.hash === "#login") {
         const ov = document.createElement("div"); ov.className = "lg-ov";
-        ov.innerHTML = '<form class="lg-box"><h2>Acesso do coordenador</h2><input type="text" class="lg-user" placeholder="Usuário (deixe vazio para a senha mestre)" autocomplete="username" aria-label="Usuário"><input type="password" placeholder="Senha" autocomplete="current-password" aria-label="Senha"><p class="lg-err"></p><button type="submit">Entrar</button><button type="button" class="x">Cancelar</button></form>';
+        ov.innerHTML = '<div class="lg-wrap" role="dialog" aria-modal="true" aria-labelledby="lgT" aria-describedby="lgD"><form class="lg-box"><h2 id="lgT">Acesso do coordenador</h2><p id="lgD" class="lg-d" style="font-size:.85rem;margin:0 0 12px">Deixe o usuário vazio para entrar com a senha mestre.</p><label for="lgU">Usuário</label><input type="text" id="lgU" class="lg-user" autocomplete="username"><label for="lgP">Senha</label><input type="password" id="lgP" autocomplete="current-password" required><p class="lg-err" role="alert"></p><button type="submit">Entrar</button><button type="button" class="x">Cancelar</button></form></div>';
         document.body.appendChild(ov);
-        const f = ov.firstChild, inp = f.querySelector("input[type=password]"), err = f.querySelector(".lg-err");
+        const f = ov.querySelector("form"), inp = f.querySelector("input[type=password]"), err = f.querySelector(".lg-err");
         f.querySelector(".x").onclick = () => { location.hash = ""; };
+        const wrap = document.querySelector(".wrap"); if (wrap) wrap.inert = true;
+        f.querySelector(".lg-user").focus();
+        ov.addEventListener("keydown", (e) => { if (e.key === "Escape") location.hash = ""; });
         f.onsubmit = async (e) => {
           e.preventDefault(); err.textContent = "";
           const r = await api({ op: "login", login: f.querySelector(".lg-user").value, password: inp.value }); const j = await r.json().catch(() => ({}));

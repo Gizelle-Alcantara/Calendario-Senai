@@ -1,0 +1,11 @@
+/* Modal, aviso (toast) e utilitários */
+.bdg{display:inline-block;padding:1px 8px;border-radius:99px;font-size:.74rem;border:1px solid currentColor;white-space:nowrap}.bdg.ok{color:var(--ok)}.bdg.warn{color:var(--warn)}.bdg.bad{color:var(--bad)}.bdg.mut{color:var(--muted)}
+.ov{position:fixed;inset:0;background:rgba(5,10,18,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;width:min(100%,460px);max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-weight:500;z-index:30;max-width:calc(100% - 32px)}
+.muted{color:var(--muted)}
+.small{font-size:.8rem}
+details>summary{cursor:pointer;font-weight:600;font-family:var(--f-display);font-size:1rem}
+.wds{display:flex;flex-wrap:wrap;gap:6px}
+.wds label{display:flex;gap:4px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:.82rem}
+@media (prefers-reduced-motion:no-preference){.day,.btn{transition:border-color .12s}}

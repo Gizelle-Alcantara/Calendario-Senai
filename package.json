@@ -10,9 +10,19 @@
     "build": "node scripts/build.js",
     "start": "node server.js",
     "import": "node scripts/import.js",
-    "test": "node --test tests/api.test.mjs"
+    "test": "node --test tests/api.test.mjs tests/rules.test.mjs",
+    "pretest": "node scripts/build.js",
+    "lint": "eslint src/js",
+    "test:a11y": "node tests/a11y.mjs",
+    "test:smoke": "node tests/smoke.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "globals": "^17.13.0",
+    "axe-core": "^4.10.2",
+    "playwright": "^1.56.0"
   }
 }

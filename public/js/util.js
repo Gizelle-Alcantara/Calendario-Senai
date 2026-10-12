@@ -1,0 +1,13 @@
+export const clone=o=>JSON.parse(JSON.stringify(o));
+export const canon=o=>JSON.stringify(o,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a<b?-1:1)):v);
+export const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"turma";
+export const pd=iso=>{const [y,m,d]=iso.split(".").length>1?[0,0,0]:iso.split("-").map(Number);return new Date(Date.UTC(y,m-1,d))};
+export const fd=dt=>dt.toISOString().slice(0,10);
+export const addD=(iso,n)=>{const d=pd(iso);d.setUTCDate(d.getUTCDate()+n);return fd(d)};
+export const dow=iso=>pd(iso).getUTCDay();
+export const br=iso=>iso&&iso!=="-"?iso.split("-").reverse().join("/"):"-";
+export const todayISO=()=>{const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`};
+export const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+export const toMin=h=>{const [a,b]=h.split(":").map(Number);return a*60+b};
+export const hm=m=>String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+export const newId=()=>"a"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
