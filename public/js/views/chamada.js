@@ -44,7 +44,7 @@ export function openRegModal(iso){
     <div id="rNao" ${sit==="nao"?"":"hidden"}><label class="f">Motivo<select id="rMot">${MOTIVOS.map(m=>`<option ${m===r.motivo?"selected":""}>${m}</option>`).join("")}</select></label>
       ${r.rep?`<p class="small">Reposição lançada em <b>${br(r.rep)}</b>. Salvar com outra situação remove essa reposição do calendário.</p>`:'<p class="small muted">Depois de salvar, a aba Chamada sugere as datas de reposição.</p>'}</div>
     <div id="rSim" ${sit==="sim"?"":"hidden"}>${S.alunos.length?`<div class="row" style="justify-content:space-between;margin-bottom:6px"><b>Faltas dos alunos</b><button class="btn sm" data-act="rall">Todos presentes</button></div>
-      <div style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto">${S.alunos.map(a=>`<div class="row" style="justify-content:space-between"><span>${esc(a.nome)}</span>${selF(a)}</div>`).join("")}</div>`:'<p class="small muted">Cadastre os alunos na aba Alunos para registrar as faltas.</p>'}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto">${S.alunos.map(a=>`<div class="row" style="justify-content:space-between"><span>${esc(a.nome)}</span>${selF(a)}</div>`).join("")}</div>`:''}</div>
     <label class="f">Observação<input type="text" id="rObs" value="${esc(r.obs||"")}"></label>
     <div class="row"><button class="btn pri" data-act="rsave">Salvar</button><button class="btn" data-act="mclose2">Cancelar</button></div></div></div>`;
 }

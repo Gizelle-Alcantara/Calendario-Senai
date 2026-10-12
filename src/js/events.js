@@ -16,7 +16,6 @@ import {actions as aDados, changes as cDados} from "./views/dados.js";
 import {actions as aAcesso} from "./views/acesso.js";
 import {actions as aAv, changes as cAv} from "./views/avisos.js";
 import {actions as aCh, changes as cCh} from "./views/chamada.js";
-import {actions as aAl, changes as cAl} from "./views/alunos.js";
 import {actions as aDocV, changes as cDocV} from "./views/docente.js";
 import {actions as aRel, changes as cRel} from "./views/relatorios.js";
 
@@ -24,8 +23,8 @@ const shell={
   mclose:(b,e)=>{if(e.target===b)closeModal();return},
   tab:(b)=>{UI.tab=b.dataset.k;UI.confirm=null;try{localStorage.setItem(KEY+"-tab",UI.tab)}catch(x){}renderView();window.scrollTo(0,0);announce(((TABS.find(x=>x[0]===UI.tab))||[])[1]||"");if(UI.tab==="acesso")loadAcc()},
 };
-const ACTIONS=Object.assign({},shell,aCal,aDisc,aDoc,aTurma,aEnv,aShare,aDados,aAcesso,aAv,aCh,aAl,aDocV,aRel);
-const CHANGES=[].concat(cTurma,cCal,cRel,cAv,cCh,cAl,cDisc,cDados,cDoc,cShare,cEnv,cDocV);
+const ACTIONS=Object.assign({},shell,aCal,aDisc,aDoc,aTurma,aEnv,aShare,aDados,aAcesso,aAv,aCh,aDocV,aRel);
+const CHANGES=[].concat(cTurma,cCal,cRel,cAv,cCh,cDisc,cDados,cDoc,cShare,cEnv,cDocV);
 
 export function initEvents(){
   document.addEventListener("click",e=>{

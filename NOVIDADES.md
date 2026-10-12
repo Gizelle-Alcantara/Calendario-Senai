@@ -37,6 +37,9 @@
 - **Aba Dados:** fazer backup agora, baixar e restaurar (com cópia automática "antes de restaurar").
 - **Recuperação total:** `scripts/restore-backup.js`. Guia: `docs/BACKUP-pt-BR.md`.
 
+## Aba Alunos removida
+- A aba *Alunos* (cadastro e frequência por aluno) saiu da interface. A Chamada segue registrando aula dada/não dada e reposição; faltas por aluno e a opção de avisar alunos deixaram de aparecer. Dados de alunos que já existiam em backups continuam guardados, só não há mais tela para editá-los.
+
 ## Código em módulos (nova rodada)
 - O arquivo único de ~1.200 linhas virou **módulos ES** (`src/js`, `src/css`), sem bundler: regras puras, estado, salvamento, uma tela por arquivo. Guia: `docs/ARQUITETURA-pt-BR.md`.
 - **36 testes** (`npm test`): API e regras do calendário (horários, encontros, choques de docente/sala, bloqueios, reposição, faltas). `npm run lint` e `npm run test:smoke` também disponíveis.

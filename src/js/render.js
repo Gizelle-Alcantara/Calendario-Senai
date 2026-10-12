@@ -3,7 +3,6 @@ import {MODE, UI} from "./state.js";
 import {renderHead} from "./ui.js";
 import {vAcesso} from "./views/acesso.js";
 import {renderAluno} from "./views/aluno.js";
-import {vAlunos} from "./views/alunos.js";
 import {vAvisos} from "./views/avisos.js";
 import {vCal} from "./views/calendario.js";
 import {vChamada} from "./views/chamada.js";
@@ -25,7 +24,7 @@ function draw(){
   if(MODE==="landing"){renderLanding();return}
   renderHead();
   const v=document.getElementById("view");
-  v.innerHTML={painel:vPainel,calendario:vCal,cronograma:vCron,enviar:vEnviar,compartilhar:vShare,disciplinas:vDisc,docentes:vDoc,turma:vTurma,dados:vDados,relatorios:vRel,acesso:vAcesso,avisos:vAvisos,chamada:vChamada,alunos:vAlunos}[UI.tab]();
+  v.innerHTML={painel:vPainel,calendario:vCal,cronograma:vCron,enviar:vEnviar,compartilhar:vShare,disciplinas:vDisc,docentes:vDoc,turma:vTurma,dados:vDados,relatorios:vRel,acesso:vAcesso,avisos:vAvisos,chamada:vChamada}[UI.tab]();
   afterRender();
 }
 

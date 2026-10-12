@@ -20,7 +20,7 @@ export function copyText(id){
 export const rowHorario=()=>{const h=horarios();return h.length?`${hm(h[0].i)} às ${hm(h[h.length-1].f)}`:""};
 
 /* ---------- cabeçalho / abas ---------- */
-export const DOCTABS=["chamada","alunos","relatorios"];
+export const DOCTABS=["chamada","relatorios"];
 export function renderHead(){
   const c=S.cfg;if(UI.role==="docente"&&!DOCTABS.includes(UI.tab))UI.tab="chamada";
   document.getElementById("hdr").innerHTML=`<h1>${esc(c.curso)}</h1><span class="meta mono">Turma ${esc(c.turma)} · Módulo ${esc(c.modulo)} · ${esc(c.turno)} · ${br(c.inicio)} a ${br(c.termino)}</span><div class="hbar"><span id="stat" class="stat"></span><select id="turmaSel" aria-label="Turma" style="width:auto;max-width:100%">${Object.entries(T).map(([id,st])=>`<option value="${esc(id)}" ${id===CUR?"selected":""}>${esc(st.cfg.turma)} · ${esc(st.cfg.curso)}</option>`).join("")}</select><button class="btn sm" data-act="turmanew">Nova turma</button><a class="btn sm" href="#aluno-${esc(CUR)}">Ver como aluno</a><a class="btn sm" href="#docente">Ver como docente</a></div>`;
