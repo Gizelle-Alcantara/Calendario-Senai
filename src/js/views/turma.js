@@ -7,6 +7,7 @@ import {toast} from "../ui.js";
 import {esc} from "../util.js";
 import {openTurmaModal, saveTurma} from "./calendario.js";
 import {horTable} from "./painel.js";
+import {vFeriados} from "./feriados.js";
 export function vTurma(){
   const c=S.cfg,chT=S.ucs.reduce((a,u)=>a+(+u.ch||0),0);
   const fld=(k,l,t="text")=>`<label class="f">${l}<input type="${t}" data-cfg="${k}" value="${esc(c[k])}"></label>`;
@@ -20,6 +21,7 @@ export function vTurma(){
     <label class="f">CH prevista (h)<input type="text" value="${chT}" readonly></label></div>
     <p class="small muted">A hora-aula é de 50 min no turno Matutino NEM e de 60 min nos demais. Mudar turno ou aulas por dia recalcula encontros e horários.</p></section>
   <section class="panel"><h2>Horário das aulas</h2>${horTable()}</section>
+  ${vFeriados()}
   <section class="panel"><h2>Excluir turma</h2><p class="small muted">Remove a turma ${esc(c.turma)} com todos os lançamentos. Os docentes continuam cadastrados.</p>
     <button class="btn bad" data-act="turmadel" ${Object.keys(T).length<2?"disabled":""}>${UI.confirm==="turmadel"?"Confirmar exclusão":"Excluir turma"}</button>${Object.keys(T).length<2?' <span class="small muted">É preciso ter ao menos uma turma.</span>':""}</section>`;
 }

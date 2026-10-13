@@ -18,13 +18,16 @@ import {actions as aAv, changes as cAv} from "./views/avisos.js";
 import {actions as aCh, changes as cCh} from "./views/chamada.js";
 import {actions as aDocV, changes as cDocV} from "./views/docente.js";
 import {actions as aRel, changes as cRel} from "./views/relatorios.js";
+import {actions as aSem} from "./views/semana.js";
+import {actions as aFer, changes as cFer} from "./views/feriados.js";
+import {actions as aHist, onKeydown} from "./historico.js";
 
 const shell={
   mclose:(b,e)=>{if(e.target===b)closeModal();return},
   tab:(b)=>{UI.tab=b.dataset.k;UI.confirm=null;try{localStorage.setItem(KEY+"-tab",UI.tab)}catch(x){}renderView();window.scrollTo(0,0);announce(((TABS.find(x=>x[0]===UI.tab))||[])[1]||"");if(UI.tab==="acesso")loadAcc()},
 };
-const ACTIONS=Object.assign({},shell,aCal,aDisc,aDoc,aTurma,aEnv,aShare,aDados,aAcesso,aAv,aCh,aDocV,aRel);
-const CHANGES=[].concat(cTurma,cCal,cRel,cAv,cCh,cDisc,cDados,cDoc,cShare,cEnv,cDocV);
+const ACTIONS=Object.assign({},shell,aCal,aDisc,aDoc,aTurma,aEnv,aShare,aDados,aAcesso,aAv,aCh,aDocV,aRel,aSem,aHist,aFer);
+const CHANGES=[].concat(cTurma,cCal,cRel,cAv,cCh,cDisc,cDados,cDoc,cShare,cEnv,cDocV,cFer);
 
 export function initEvents(){
   document.addEventListener("click",e=>{
@@ -36,6 +39,6 @@ export function initEvents(){
     if(hit)hit[1](t,e);
   });
   document.addEventListener("input",e=>{if(e.target.id==="holName")UI.holName=e.target.value;if(e.target.id==="envMsg")UI.env.msg=e.target.value});
-  document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();onKeydown(e)});
   window.addEventListener("hashchange",()=>{if(MODE!=="planner"||/^#(aluno|docente|login)/.test(location.hash))location.reload()});
 }

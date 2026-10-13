@@ -65,6 +65,23 @@ for (const [tema, vw] of [["light", 1280], ["dark", 1280], ["light", 360], ["dar
     await axe(p, `${nome} · ${tema} · ${vw}px`);
     const over = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     ok(`sem rolagem horizontal da página: ${nome} · ${vw}px`, over <= 1, "excesso " + over + "px");
+    if (nome === "Calendário") {
+      // o outro modo de exibição (mês ↔ semana)
+      const outro = await p.$eval("[data-act=cview][aria-pressed=false]", (b) => b.dataset.k);
+      await p.click(`[data-act=cview][data-k=${outro}]`); await settle(p);
+      await axe(p, `Calendário (${outro}) · ${tema} · ${vw}px`);
+      ok(`sem rolagem horizontal no calendário (${outro}) · ${vw}px`, (await p.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 1);
+      await p.click(`[data-act=cview][data-k=${outro === "semana" ? "mes" : "semana"}]`); await settle(p);
+    }
+    if (nome === "Turma") {
+      await p.fill("#impTxt", "20/11/2026;Consciência Negra;feriado\n21/12/2026;23/12/2026;Recesso;sem aula");
+      await p.click("[data-act=impprev]"); await p.waitForSelector("#impPrev table"); await settle(p);
+      await axe(p, `Turma · prévia da importação · ${tema} · ${vw}px`);
+      ok("a prévia da importação é anunciada (role=status)", await p.$("#impPrev [role=status]"));
+      await p.fill("#impTxt", "lixo"); await p.click("[data-act=impprev]"); await settle(p);
+      ok("erro de importação tem role=alert", await p.$("#impPrev [role=alert]"));
+      await axe(p, `Turma · erro de importação · ${tema} · ${vw}px`);
+    }
   }
   if (tema === "light" && vw === 1280) {
     // ---------- diálogos ----------
@@ -88,7 +105,8 @@ for (const [tema, vw] of [["light", 1280], ["dark", 1280], ["light", 360], ["dar
     // nova turma
     await p.click('#tabs button:has-text("Turma")'); await settle(p);
     await p.click('[data-act=turmanew]'); await settle(p);
-    await axe(p, "diálogo nova turma");
+    await p.selectOption("#ntCopy", { index: 1 }); await settle(p);
+    await axe(p, "diálogo nova turma (copiando de outra)");
     await p.keyboard.press("Escape"); await settle(p);
     // abas: estado atual exposto
     ok("aba atual marcada com aria-current", await p.$('#tabs button[aria-current=page]'));
@@ -122,7 +140,13 @@ for (const [rot, hash] of [["escolha (landing)", ""], ["aluno", "#aluno-202629"]
   const pg = await abrir(hash);
   const txt = await pg.innerText("#view");
   ok(`tela pública com conteúdo real: ${rot}`, txt.length > 20 && !/ainda não foi publicado/.test(txt), txt.slice(0, 60));
-  await axe(pg, "público · " + rot); await pg.close();
+  await axe(pg, "público · " + rot);
+  if (await pg.$("[data-act=cview]")) {
+    const outro = await pg.$eval("[data-act=cview][aria-pressed=false]", (b) => b.dataset.k);
+    await pg.click(`[data-act=cview][data-k=${outro}]`); await pg.waitForTimeout(300);
+    await axe(pg, `público · ${rot} · modo ${outro}`);
+  }
+  await pg.close();
 }
 {
   const pg = await abrir("#docente");

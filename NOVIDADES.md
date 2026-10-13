@@ -37,6 +37,12 @@
 - **Aba Dados:** fazer backup agora, baixar e restaurar (com cópia automática "antes de restaurar").
 - **Recuperação total:** `scripts/restore-backup.js`. Guia: `docs/BACKUP-pt-BR.md`.
 
+## Calendário: importar, copiar, desfazer e semana (nova rodada)
+- **Importar feriados e recessos.** Aba *Turma → Importar feriados e calendário letivo*. Aceita CSV (do Excel; `data;nome;tipo`, com data final opcional para recessos) e ICS (Google Agenda, Outlook). Mostra uma **prévia** (novo, atualiza, já lançado, dia com aula, fora do período) antes de aplicar; dias que já têm aula só são substituídos se você marcar. Há um arquivo modelo para baixar. Vale para a turma aberta (para outras turmas, repita ou use a cópia de semestre).
+- **Copiar turma para o próximo semestre.** *Nova turma → Copiar da turma…* sugere o período 26 semanas depois e leva disciplinas, docentes, as aulas (deslocadas em semanas inteiras, mantendo o dia da semana) e os feriados fixos no ano certo. Feriados móveis (Carnaval, Sexta-feira Santa…) **não** são copiados e a mensagem avisa quais lançar ou importar. Chamada e faltas não são copiadas.
+- **Desfazer e refazer** (botões no cabeçalho, Ctrl+Z e Ctrl+Y fora dos campos de texto). Vale para a sessão aberta (até 60 passos); o histórico de versões da aba Acesso continua existindo.
+- **Visão de semana** no calendário do coordenador e nas telas de aluno e docente: uma lista com um dia por linha, aberta por padrão em telas estreitas. A escolha Mês/Semana fica lembrada.
+
 ## Aba Alunos removida
 - A aba *Alunos* (cadastro e frequência por aluno) saiu da interface. A Chamada segue registrando aula dada/não dada e reposição; faltas por aluno e a opção de avisar alunos deixaram de aparecer. Dados de alunos que já existiam em backups continuam guardados, só não há mais tela para editá-los.
 
@@ -48,5 +54,5 @@
 ## Acessibilidade (nova rodada)
 - Teclado completo, diálogos com foco preso e retorno, setas no calendário, link de pular, avisos para leitor de tela, tabelas e barras nomeadas, alto contraste, 200% de zoom e 360 px sem rolagem lateral.
 - **Correção:** o `index.html` publicado não tinha doctype, idioma nem viewport; agora tem.
-- Verificação automática com axe-core: `npm run test:a11y` (144/144). Falta testar com leitores de tela reais. Detalhes e limites: `docs/ACESSIBILIDADE-pt-BR.md`.
+- Verificação automática com axe-core: `npm run test:a11y` (161/161). Falta testar com leitores de tela reais. Detalhes e limites: `docs/ACESSIBILIDADE-pt-BR.md`.
 - Atualizando: o app instalado (PWA) troca de versão sozinho (cache `planejador-v3`); recarregue a página uma vez.

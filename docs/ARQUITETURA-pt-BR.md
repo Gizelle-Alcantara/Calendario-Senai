@@ -14,12 +14,15 @@ src/
     state.js            estado compartilhado (G, T, CUR, S, MODE, UI) e setState()
     store.js            salvamento (banco + cópia local), status, conversão de/para documentos
     rules.js            regras puras: carga, encontros, choques, bloqueios, reposição, faltas
+    importar.js         leitura de CSV/ICS de feriados, prévia e aplicação (regras puras)
+    semestre.js         cópia de turma para o semestre seguinte (regras puras)
+    historico.js        desfazer/refazer (instantâneos em store.js)
     ui.js               toast, cabeçalho/abas, helpers de interface
     a11y.js             foco, diálogos, anúncios, semântica aplicada após cada renderização
     events.js           delegação de eventos (clique/change/input/teclado) → registros por tela
     render.js           escolhe a tela conforme o modo e a aba
     theme.js            tema claro/escuro/automático
-    views/*.js          uma tela por arquivo; cada uma exporta `actions` (data-act) e `changes`
+    views/*.js          uma tela por arquivo (feriados.js = importação; semana.js = visão de semana); cada uma exporta `actions` (data-act) e `changes`
     vendor/qrcode.js    biblioteca de QR Code (antes vinha de um CDN)
 ```
 
@@ -33,7 +36,7 @@ src/
 | Comando | O que faz |
 |---|---|
 | `npm run build` | gera `public/` |
-| `npm test` | gera `public/` e roda 36 testes (API + regras) |
+| `npm test` | gera `public/` e roda os testes (API, regras, importação, cópia de semestre, desfazer, semana) |
 | `npm run lint` | ESLint nos módulos (`no-undef` garante que nenhum import ficou faltando) |
 | `npm run test:smoke` | percorre as telas num Chromium, lança aula, cadastra aluno e confere o console |
 | `npm run test:a11y` | axe-core + testes de teclado/foco (precisa de `npm install` e de um Chromium; defina `CHROMIUM=/caminho` se necessário) |

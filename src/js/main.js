@@ -2,12 +2,13 @@ import {initA11y} from "./a11y.js";
 import {initEvents} from "./events.js";
 import {renderView} from "./render.js";
 import {ALUNO_ID, CUR, G, MODE, T, UI, emptyTurma, normalize, setState} from "./state.js";
-import {P, docItems, fromDocs, persistLocal, save, setStatus} from "./store.js";
+import {P, docItems, fromDocs, histReset, persistLocal, save, setStatus} from "./store.js";
 import {initTheme} from "./theme.js";
 import {toast} from "./ui.js";
+import {initView} from "./views/semana.js";
 import {canon} from "./util.js";
 window.addEventListener("plan-conflict",()=>toast("Outra pessoa salvou esta turma ao mesmo tempo. Sua última alteração não foi aplicada: a versão mais recente foi carregada."));
-initTheme();initEvents();initA11y();
+initTheme();initEvents();initA11y();initView();histReset();
 renderView();
 (async()=>{
   let db=null,u=null;
@@ -45,7 +46,7 @@ renderView();
     P.lastJson={};now.forEach(([k,d])=>{P.lastJson[k]=canon(d)});
     if(r.legacy)delete P.lastJson.geral;
     if(canon([now])===cur&&!r.legacy){setStatus("saved");return}
-    persistLocal();renderView();
+    persistLocal();histReset();renderView();
     if(r.legacy)save();else setStatus("saved");
   },()=>{if(MODE!=="planner"){UI.err="Não foi possível carregar o calendário agora.";renderView()}else setStatus("error")});
 })();

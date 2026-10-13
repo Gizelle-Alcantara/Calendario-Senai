@@ -4,6 +4,7 @@ import {S, T, UI} from "../state.js";
 import {fdt, rowHorario, sig} from "../ui.js";
 import {br, dow, esc, todayISO} from "../util.js";
 import {monthList} from "./calendario.js";
+import {ensureWeek, viewToggle, weekList, weekNav} from "./semana.js";
 import {horTable} from "./painel.js";
 export function roCells(ym,C){
   const [y,m]=ym.split("-").map(Number),first=new Date(Date.UTC(y,m-1,1)).getUTCDay(),dim=new Date(Date.UTC(y,m,0)).getUTCDate(),t=todayISO();
@@ -37,6 +38,12 @@ export function renderAluno(){
   if(!UI.month){const ml=monthList(),tm=t.slice(0,7);UI.month=ml.includes(tm)?tm:ml[0]}
   const [y,m]=UI.month.split("-").map(Number),ml=monthList();
   const used=new Set(C.rows.map(r=>r.u.sigla));
+  const semana=UI.cview==="semana";if(semana)ensureWeek(c.inicio,c.termino);
+  const dayFn=iso=>{
+    const e=S.days[iso]||{},w=dow(iso),s=e.s||[],cls=[];
+    if(w===0||w===6)cls.push("wk");if(iso<S.cfg.inicio||iso>S.cfg.termino)cls.push("out");if(e.t==="feriado")cls.push("hol");if(e.t==="sem")cls.push("sem");
+    return {cls,lab:e.h||"",clickable:false,items:s.map((sg,j)=>({sg,j})).filter(x=>!UI.fUc||x.sg===UI.fUc).map(({sg,j})=>{const u=ucOf(sg)||{};return {c:colorOf(sg),html:`<b>${esc(sg)}</b> ${C.enc[iso][j]} · ${esc(u.nome||sg)}${u.docente?" · "+esc(u.docente):""}${u.sala?" · sala "+esc(u.sala):""} · ${rowHorario()}`}})};
+  };
   v.innerHTML=`
   <section class="panel"><h2>Próximas aulas</h2>
     ${next.length?`<div class="tw"><table><thead><tr><th>Data</th><th>Dia</th><th>Disciplina</th><th class="n">Encontro</th><th>Docente</th><th>Sala</th><th>Horário</th><th>Obs.</th></tr></thead><tbody>
@@ -47,10 +54,10 @@ export function renderAluno(){
   ${C.rows.map(r=>{const done=r.ds.filter(d=>d<=t).length;return `<tr><td>${sig(r.u.sigla)} ${esc(r.u.nome)}</td><td>${esc(r.u.docente)||'<span class="muted">-</span>'}</td><td class="n mono">${r.u.ch} h</td>
   <td><div class="bar" style="--c:${colorOf(r.u.sigla)}"><i style="width:${r.P?Math.min(100,done/r.P*100):0}%"></i></div></td><td class="n mono">${done}/${r.P}</td><td class="n mono">${r.R}</td><td class="mono">${br(r.ini)}</td><td class="mono">${br(r.fim)}</td><td><span class="pill ${r.status.replace(" ","-")}">${r.status}</span></td></tr>`}).join("")}
   </tbody></table></div><p class="small muted">Limite de faltas: 25% das aulas de cada disciplina.${c.coord?" Coordenação: "+esc(c.coord)+".":""}</p></section>
-  <section class="panel"><div class="calbar"><div class="row"><button class="btn" data-act="mprev" aria-label="Mês anterior">‹</button><h2>${MESES[m-1]} de ${y}</h2><button class="btn" data-act="mnext" aria-label="Próximo mês">›</button></div>
-    <select id="mjump" aria-label="Ir para o mês" style="width:auto">${ml.map(x=>`<option value="${x}" ${x===UI.month?"selected":""}>${MESES[+x.slice(5)-1]} ${x.slice(0,4)}</option>`).join("")}</select></div>
+  <section class="panel">${semana?weekNav():""}<div class="calbar" ${semana?"hidden":""}><div class="row"><button class="btn" data-act="mprev" aria-label="Mês anterior">‹</button><h2>${MESES[m-1]} de ${y}</h2><button class="btn" data-act="mnext" aria-label="Próximo mês">›</button></div>
+    <select id="mjump" aria-label="Ir para o mês" style="width:auto">${ml.map(x=>`<option value="${x}" ${x===UI.month?"selected":""}>${MESES[+x.slice(5)-1]} ${x.slice(0,4)}</option>`).join("")}</select>${viewToggle()}</div>
     <div class="pal" style="margin-block:12px 10px" role="group" aria-label="Filtrar disciplina"><button data-act="fuc" data-k="" aria-pressed="${!UI.fUc}">Todas</button>${S.ucs.filter(u=>used.has(u.sigla)).map(u=>`<button data-act="fuc" data-k="${esc(u.sigla)}" aria-pressed="${UI.fUc===u.sigla}" title="${esc(u.nome)}"><span class="sw" style="--c:${colorOf(u.sigla)}"></span>${esc(u.sigla)}</button>`).join("")}</div>
-    <div class="cal">${roCells(UI.month,C)}</div><p class="small muted">O número ao lado da sigla é o encontro. Dias em vermelho são feriados.</p></section>
+    ${semana?weekList(dayFn):`<div class="cal">${roCells(UI.month,C)}</div>`}<p class="small muted">O número ao lado da sigla é o encontro. Dias em vermelho são feriados.</p></section>
   <section class="panel"><h2>Horário das aulas</h2>${horTable()}</section>`;
 }
 

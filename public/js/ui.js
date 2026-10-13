@@ -1,7 +1,7 @@
 import {TABS} from "./config.js";
 import {colorOf, horarios, spanOf} from "./rules.js";
 import {CUR, S, T, UI} from "./state.js";
-import {setStatus} from "./store.js";
+import {H, setStatus} from "./store.js";
 import {br, esc, hm} from "./util.js";
 export function toast(m){
   const r=document.getElementById("toastRoot");
@@ -23,7 +23,7 @@ export const rowHorario=()=>{const h=horarios();return h.length?`${hm(h[0].i)} �
 export const DOCTABS=["chamada","relatorios"];
 export function renderHead(){
   const c=S.cfg;if(UI.role==="docente"&&!DOCTABS.includes(UI.tab))UI.tab="chamada";
-  document.getElementById("hdr").innerHTML=`<h1>${esc(c.curso)}</h1><span class="meta mono">Turma ${esc(c.turma)} · Módulo ${esc(c.modulo)} · ${esc(c.turno)} · ${br(c.inicio)} a ${br(c.termino)}</span><div class="hbar"><span id="stat" class="stat"></span><select id="turmaSel" aria-label="Turma" style="width:auto;max-width:100%">${Object.entries(T).map(([id,st])=>`<option value="${esc(id)}" ${id===CUR?"selected":""}>${esc(st.cfg.turma)} · ${esc(st.cfg.curso)}</option>`).join("")}</select><button class="btn sm" data-act="turmanew">Nova turma</button><a class="btn sm" href="#aluno-${esc(CUR)}">Ver como aluno</a><a class="btn sm" href="#docente">Ver como docente</a></div>`;
+  document.getElementById("hdr").innerHTML=`<h1>${esc(c.curso)}</h1><span class="meta mono">Turma ${esc(c.turma)} · Módulo ${esc(c.modulo)} · ${esc(c.turno)} · ${br(c.inicio)} a ${br(c.termino)}</span><div class="hbar"><span id="stat" class="stat"></span><select id="turmaSel" aria-label="Turma" style="width:auto;max-width:100%">${Object.entries(T).map(([id,st])=>`<option value="${esc(id)}" ${id===CUR?"selected":""}>${esc(st.cfg.turma)} · ${esc(st.cfg.curso)}</option>`).join("")}</select><button class="btn sm" data-act="undo" title="Desfazer (Ctrl+Z)" aria-label="Desfazer a última alteração (Ctrl+Z)" ${H.undo.length?"":"disabled"}><span aria-hidden="true">↶</span> Desfazer</button><button class="btn sm" data-act="redo" title="Refazer (Ctrl+Y)" aria-label="Refazer a alteração desfeita (Ctrl+Y)" ${H.redo.length?"":"disabled"}><span aria-hidden="true">↷</span> Refazer</button><button class="btn sm" data-act="turmanew">Nova turma</button><a class="btn sm" href="#aluno-${esc(CUR)}">Ver como aluno</a><a class="btn sm" href="#docente">Ver como docente</a></div>`;
   setStatus(UI.status);
   document.getElementById("tabs").innerHTML=TABS.filter(x=>UI.role!=="docente"||DOCTABS.includes(x[0])).map(([k,l])=>`<button data-act="tab" data-k="${k}"${UI.tab===k?' aria-current="page"':""}>${l}</button>`).join("");
 }

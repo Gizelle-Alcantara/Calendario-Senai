@@ -10,7 +10,7 @@
     "build": "node scripts/build.js",
     "start": "node server.js",
     "import": "node scripts/import.js",
-    "test": "node --test tests/api.test.mjs tests/rules.test.mjs",
+    "test": "node --test tests/api.test.mjs tests/rules.test.mjs tests/recursos.test.mjs",
     "pretest": "node scripts/build.js",
     "lint": "eslint src/js",
     "test:a11y": "node tests/a11y.mjs",

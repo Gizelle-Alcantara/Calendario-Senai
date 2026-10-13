@@ -25,3 +25,4 @@ nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;pad
 nav.tabs button[aria-current=page]{color:var(--ink);border-bottom-color:var(--accent)}
 main{padding-block:18px;display:flex;flex-direction:column;gap:18px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+[hidden]{display:none!important}
